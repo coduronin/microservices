@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+      - name: user-service
+        image: aybukecnz/user-service:latest   # Docker Hub'daki user-service imajını kullanıyoruz
+        ports:
+        - containerPort: 5000                   # Mikroservisin kullandığı port
+        env:
+        - name: DATABASE_URL
+          value: "mongodb://mongo:27017/users" # Örnek MongoDB bağlantısı, kendi veritabanı bilgilerinle değiştir.
+        - name: FLASK_ENV
+          value: "production"
+        - name: SECRET_KEY
+          value: "mysecretkey"                 # Flask için secret key
+        resources:
+          requests:
+            memory: "512Mi"                    # Minimum bellek isteği
+            cpu: "250m"                        # Minimum CPU isteği
+          limits:
+            memory: "1Gi"                      # Maksimum bellek limiti
+            cpu: "500m"                        # Maksimum CPU limiti
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+spec:
+  selector:
+    app: user-service
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+  type: ClusterIP
