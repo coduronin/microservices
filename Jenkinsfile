@@ -38,7 +38,11 @@ pipeline {
                 script {
                     // Payment Service için unit testlerini çalıştırıyoruz
                     dir('payment_service') {
-                        sh 'pytest'
+                        if (isUnix()) {
+                            sh 'pytest'  // Linux/Mac için
+                        } else {
+                            bat 'pytest'  // Windows için
+                        }
                     }
                 }
             }
@@ -49,7 +53,11 @@ pipeline {
                 script {
                     // User Service için unit testlerini çalıştırıyoruz
                     dir('user_service') {
-                        sh 'pytest'
+                        if (isUnix()) {
+                            sh 'pytest'  // Linux/Mac için
+                        } else {
+                            bat 'pytest'  // Windows için
+                        }
                     }
                 }
             }
@@ -60,7 +68,11 @@ pipeline {
                 script {
                     // Payment Service için Kubernetes'e deploy işlemi
                     dir('payment_service') {
-                        sh 'kubectl apply -f deployment.yml'
+                        if (isUnix()) {
+                            sh 'kubectl apply -f deployment.yml'  // Linux/Mac için
+                        } else {
+                            bat 'kubectl apply -f deployment.yml'  // Windows için
+                        }
                     }
                 }
             }
@@ -71,7 +83,11 @@ pipeline {
                 script {
                     // User Service için Kubernetes'e deploy işlemi
                     dir('user_service') {
-                        sh 'kubectl apply -f deployment.yml'
+                        if (isUnix()) {
+                            sh 'kubectl apply -f deployment.yml'  // Linux/Mac için
+                        } else {
+                            bat 'kubectl apply -f deployment.yml'  // Windows için
+                        }
                     }
                 }
             }
