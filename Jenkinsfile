@@ -19,7 +19,7 @@ pipeline {
             steps {
                 script {
                     // Docker Hub'dan Payment Service imajını çekiyoruz
-                    docker.pull("aybukecanoz/payment-service:latest")
+                    docker.image("aybukecanoz/payment-service:latest").pull()
                 }
             }
         }
@@ -28,7 +28,7 @@ pipeline {
             steps {
                 script {
                     // Docker Hub'dan User Service imajını çekiyoruz
-                    docker.pull("aybukecanoz/user-service:latest")
+                    docker.image("aybukecanoz/user-service:latest").pull()
                 }
             }
         }
