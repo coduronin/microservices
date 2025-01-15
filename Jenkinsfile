@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        REGISTRY = "your-docker-registry"  // Docker Registry (Örneğin Docker Hub)
+        REGISTRY = "aybukecanoz"  // Docker Registry (Örneğin Docker Hub)
         PAYMENT_SERVICE_IMAGE = "payment-service"
-        NOTIFICATION_SERVICE_IMAGE = "notification-service"
+        USER_SERVICE_IMAGE = "user-service"
     }
 
     stages {
@@ -15,24 +15,20 @@ pipeline {
             }
         }
 
-        stage('Build Payment Service Docker Image') {
+        stage('Pull Payment Service Docker Image') {
             steps {
                 script {
-                    // Payment Service için Docker imajını build ediyoruz
-                    dir('payment_service') {
-                        docker.build("${REGISTRY}/${PAYMENT_SERVICE_IMAGE}:latest")
-                    }
+                    // Docker Hub'dan Payment Service imajını çekiyoruz
+                    docker.pull("aybukecanoz/payment-service:latest")
                 }
             }
         }
 
-        stage('Build Notification Service Docker Image') {
+        stage('Pull User Service Docker Image') {
             steps {
                 script {
-                    // Notification Service için Docker imajını build ediyoruz
-                    dir('notification_service') {
-                        docker.build("${REGISTRY}/${NOTIFICATION_SERVICE_IMAGE}:latest")
-                    }
+                    // Docker Hub'dan User Service imajını çekiyoruz
+                    docker.pull("aybukecanoz/user-service:latest")
                 }
             }
         }
@@ -48,34 +44,12 @@ pipeline {
             }
         }
 
-        stage('Run Unit Tests for Notification Service') {
+        stage('Run Unit Tests for User Service') {
             steps {
                 script {
-                    // Notification Service için unit testlerini çalıştırıyoruz
-                    dir('notification_service') {
+                    // User Service için unit testlerini çalıştırıyoruz
+                    dir('user_service') {
                         sh 'pytest'
-                    }
-                }
-            }
-        }
-
-        stage('Push Payment Service Docker Image') {
-            steps {
-                script {
-                    // Docker Hub'a Payment Service imajını push ediyoruz
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
-                        docker.image("${REGISTRY}/${PAYMENT_SERVICE_IMAGE}:latest").push()
-                    }
-                }
-            }
-        }
-
-        stage('Push Notification Service Docker Image') {
-            steps {
-                script {
-                    // Docker Hub'a Notification Service imajını push ediyoruz
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
-                        docker.image("${REGISTRY}/${NOTIFICATION_SERVICE_IMAGE}:latest").push()
                     }
                 }
             }
@@ -92,11 +66,11 @@ pipeline {
             }
         }
 
-        stage('Deploy Notification Service to Kubernetes') {
+        stage('Deploy User Service to Kubernetes') {
             steps {
                 script {
-                    // Notification Service için Kubernetes'e deploy işlemi
-                    dir('notification_service') {
+                    // User Service için Kubernetes'e deploy işlemi
+                    dir('user_service') {
                         sh 'kubectl apply -f deployment.yml'
                     }
                 }
