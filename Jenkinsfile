@@ -5,6 +5,7 @@ pipeline {
         REGISTRY = "aybukecanoz"  // Docker Registry (Örneğin Docker Hub)
         PAYMENT_SERVICE_IMAGE = "payment-service"
         USER_SERVICE_IMAGE = "user-service"
+        VENV_PATH = "C:\\Users\\aybuke\\myenv\\Scripts"  // Sanal ortam yolunu buraya ekleyin
     }
 
     stages {
@@ -38,11 +39,10 @@ pipeline {
                 script {
                     // Payment Service için unit testlerini çalıştırıyoruz
                     dir('payment_service') {
-                        if (isUnix()) {
-                            sh 'pytest'  // Linux/Mac için
-                        } else {
-                            bat 'pytest'  // Windows için
-                        }
+                        bat """ 
+                        C:\\Users\\aybuke\\myenv\\Scripts\\activate.bat
+                        pytest
+                        """
                     }
                 }
             }
@@ -53,11 +53,10 @@ pipeline {
                 script {
                     // User Service için unit testlerini çalıştırıyoruz
                     dir('user_service') {
-                        if (isUnix()) {
-                            sh 'pytest'  // Linux/Mac için
-                        } else {
-                            bat 'pytest'  // Windows için
-                        }
+                        bat """ 
+                        C:\\Users\\aybuke\\myenv\\Scripts\\activate.bat
+                        pytest
+                        """
                     }
                 }
             }
@@ -68,11 +67,7 @@ pipeline {
                 script {
                     // Payment Service için Kubernetes'e deploy işlemi
                     dir('payment_service') {
-                        if (isUnix()) {
-                            sh 'kubectl apply -f deployment.yml'  // Linux/Mac için
-                        } else {
-                            bat 'kubectl apply -f deployment.yml'  // Windows için
-                        }
+                        bat 'kubectl apply -f deployment.yml'
                     }
                 }
             }
@@ -83,11 +78,7 @@ pipeline {
                 script {
                     // User Service için Kubernetes'e deploy işlemi
                     dir('user_service') {
-                        if (isUnix()) {
-                            sh 'kubectl apply -f deployment.yml'  // Linux/Mac için
-                        } else {
-                            bat 'kubectl apply -f deployment.yml'  // Windows için
-                        }
+                        bat 'kubectl apply -f deployment.yml'
                     }
                 }
             }
