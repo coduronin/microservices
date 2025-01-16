@@ -6,6 +6,7 @@ pipeline {
         PAYMENT_SERVICE_IMAGE = "payment-service"
         USER_SERVICE_IMAGE = "user-service"
         VENV_PATH = "C:\\Users\\aybuke\\myenv\\Scripts"  // Sanal ortam yolunu buraya ekleyin
+        KUBECONFIG = "C:/Users/aybuke/.kube/config"  // Kubeconfig dosyasının yolu
     }
 
     stages {
