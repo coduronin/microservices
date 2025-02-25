@@ -2,26 +2,24 @@ pipeline {
     agent any
 
     environment {
-        REGISTRY = "aybukecanoz"  // Docker Registry (Örneğin Docker Hub)
-        PAYMENT_SERVICE_IMAGE = "payment-service"
-        USER_SERVICE_IMAGE = "user-service"
-        VENV_PATH = "C:\\Users\\aybuke\\myenv\\Scripts"  // Sanal ortam yolunu buraya ekleyin
-        KUBECONFIG = "C:/Users/aybuke/.kube/config"  // Kubeconfig dosyasının yolu
+        // Set the working directory for payment and user services
+        PAYMENT_SERVICE_DIR = 'payment_service'
+        USER_SERVICE_DIR = 'user_service'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // GitHub reposundan kodu çekiyoruz
-                git 'https://github.com/aybukecnz/microservices.git'
+                // Clone the repository from GitHub
+                git 'https://github.com/coduronin/microservices.git'
             }
         }
 
         stage('Pull Payment Service Docker Image') {
             steps {
                 script {
-                    // Docker Hub'dan Payment Service imajını çekiyoruz
-                    docker.image("aybukecanoz/payment-service:latest").pull()
+                    // Pull the latest Docker image for Payment Service
+                    bat 'docker pull "aybukecanoz/payment-service:latest"'
                 }
             }
         }
@@ -29,35 +27,51 @@ pipeline {
         stage('Pull User Service Docker Image') {
             steps {
                 script {
-                    // Docker Hub'dan User Service imajını çekiyoruz
-                    docker.image("aybukecanoz/user-service:latest").pull()
+                    // Pull the latest Docker image for User Service
+                    bat 'docker pull "aybukecanoz/user-service:latest"'
                 }
             }
         }
 
-        stage('Run Unit Tests for Payment Service') {
+        stage('Install pytest and Run Unit Tests for Payment Service') {
             steps {
                 script {
-                    // Payment Service için unit testlerini çalıştırıyoruz
-                    dir('payment_service') {
-                        bat """ 
-                        C:\\Users\\aybuke\\myenv\\Scripts\\activate.bat
-                        pytest
-                        """
+                    // Navigate to the payment_service directory
+                    dir(PAYMENT_SERVICE_DIR) {
+                        // Create a virtual environment and install pytest
+                        bat '''
+                            python -m venv venv
+                            venv\\Scripts\\activate
+                            pip install --upgrade pip
+                            pip install pytest
+                        '''
+                        // Run unit tests for the Payment Service
+                        bat '''
+                            venv\\Scripts\\activate
+                            pytest --maxfail=1 --disable-warnings -q
+                        '''
                     }
                 }
             }
         }
 
-        stage('Run Unit Tests for User Service') {
+        stage('Install pytest and Run Unit Tests for User Service') {
             steps {
                 script {
-                    // User Service için unit testlerini çalıştırıyoruz
-                    dir('user_service') {
-                        bat """ 
-                        C:\\Users\\aybuke\\myenv\\Scripts\\activate.bat
-                        pytest
-                        """
+                    // Navigate to the user_service directory
+                    dir(USER_SERVICE_DIR) {
+                        // Create a virtual environment and install pytest
+                        bat '''
+                            python -m venv venv
+                            venv\\Scripts\\activate
+                            pip install --upgrade pip
+                            pip install pytest
+                        '''
+                        // Run unit tests for the User Service
+                        bat '''
+                            venv\\Scripts\\activate
+                            pytest --maxfail=1 --disable-warnings -q
+                        '''
                     }
                 }
             }
@@ -66,10 +80,8 @@ pipeline {
         stage('Deploy Payment Service to Kubernetes') {
             steps {
                 script {
-                    // Payment Service için Kubernetes'e deploy işlemi
-                    dir('payment_service') {
-                        bat 'kubectl apply -f deployment.yml'
-                    }
+                    // Add your Kubernetes deployment script here
+                    echo "Deploying Payment Service to Kubernetes..."
                 }
             }
         }
@@ -77,10 +89,8 @@ pipeline {
         stage('Deploy User Service to Kubernetes') {
             steps {
                 script {
-                    // User Service için Kubernetes'e deploy işlemi
-                    dir('user_service') {
-                        bat 'kubectl apply -f deployment.yml'
-                    }
+                    // Add your Kubernetes deployment script here
+                    echo "Deploying User Service to Kubernetes..."
                 }
             }
         }
@@ -88,7 +98,14 @@ pipeline {
 
     post {
         always {
-            cleanWs()  // Pipeline tamamlandığında workspace temizleniyor
+            // Clean up the workspace after the pipeline finishes
+            cleanWs()
+        }
+        success {
+            echo 'Pipeline executed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Please check the logs for errors.'
         }
     }
 }
