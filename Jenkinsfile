@@ -5,6 +5,7 @@ pipeline {
         // Set the working directory for payment and user services
         PAYMENT_SERVICE_DIR = 'payment_service'
         USER_SERVICE_DIR = 'user_service'
+        KUBECONFIG = "C:/Users/izzat/.kube/config"
     }
 
     stages {
@@ -77,11 +78,13 @@ pipeline {
             }
         }
 
-        stage('Deploy Payment Service to Kubernetes') {
+stage('Deploy Payment Service to Kubernetes') {
             steps {
                 script {
-                    // Add your Kubernetes deployment script here
-                    echo "Deploying Payment Service to Kubernetes..."
+                    // Payment Service için Kubernetes'e deploy işlemi
+                    dir('payment_service') {
+                        bat 'kubectl apply -f deployment.yml'
+                    }
                 }
             }
         }
@@ -89,12 +92,15 @@ pipeline {
         stage('Deploy User Service to Kubernetes') {
             steps {
                 script {
-                    // Add your Kubernetes deployment script here
-                    echo "Deploying User Service to Kubernetes..."
+                    // User Service için Kubernetes'e deploy işlemi
+                    dir('user_service') {
+                        bat 'kubectl apply -f deployment.yml'
+                    }
                 }
             }
         }
     }
+
 
     post {
         always {
